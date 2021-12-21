@@ -5,34 +5,39 @@
 package com.ntak.pearlzip.archive.zip4j.testfx;
 
 import com.ntak.pearlzip.archive.pub.FileInfo;
+import com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService;
+import com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService;
+import com.ntak.pearlzip.archive.zip4j.util.Zip4jTestUtil;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.util.JFXUtil;
+import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
 import com.ntak.testfx.FormUtil;
+import com.ntak.testfx.TypeUtil;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DialogPane;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.stage.Stage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import com.ntak.pearlzip.archive.zip4j.util.Zip4jTestUtil;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static com.ntak.pearlzip.archive.pub.ArchiveService.CUSTOM_MENUS;
+import static com.ntak.pearlzip.archive.zip4j.constants.Zip4jConstants.KEY_ENCRYPTION_ENABLE;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.DSV;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.SETTINGS_FILE;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.STORE_TEMP;
+import static com.ntak.pearlzip.ui.pub.PearlZipApplication.genFrmAbout;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static com.ntak.testfx.FormUtil.resetComboBox;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -52,6 +57,8 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
      *  + Zip4j options no persistence (Cancel)
      *  + New archive - length validation check
      *  + Open archive - length validation check
+     *  + Encrypt an unencrypted zip archive - success
+     *  + Encrypt a temporary zip archive - failure
      */
 
     @Test
@@ -483,5 +490,92 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
         Assertions.assertTrue(dialogPane.getHeaderText()
                                         .matches(String.format(".*issue-extracting-file.*%s.*", archive)));
         Assertions.assertTrue(JFXUtil.getMainStageInstances().stream().noneMatch(s->s.getTitle().contains(archive.toString())), "The archive was open unexpectedly");
+    }
+
+    @Test
+    @DisplayName("Test: Encrypt an unencrypted zip archive successfully")
+    public void testFX_EncryptUnencryptedZipArchive_Success() throws IOException, InterruptedException {
+        Path srcArchive = Paths.get("src", "test", "resources", "unencryptedArchive.zip").toAbsolutePath();
+        Path archive = Paths.get("tempArchive.zip").toAbsolutePath();
+        try {
+            Files.copy(srcArchive, archive, StandardCopyOption.REPLACE_EXISTING);
+            // Hard coded movement to open MenuItem
+            clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 80));
+            PearlZipFXUtil.simOpenArchive(this, archive, false, false);
+
+            CountDownLatch latch = new CountDownLatch(1);
+            JFXUtil.runLater(() -> {
+                try {
+                    Stage aboutStage = genFrmAbout();
+                    javafx.scene.control.Menu menu = new javafx.scene.control.Menu();
+                    final MenuBar menuBar = (MenuBar) new Zip4jArchiveWriteService().getFXFormByIdentifier(CUSTOM_MENUS)
+                                                                                    .get()
+                                                                                    .getContent();
+                    menu.getItems()
+                        .addAll(menuBar.getMenus().get(0).getItems());
+                    menu.setText(menuBar.getMenus().get(0).getText());
+                    createSystemMenu(aboutStage,
+                                     Collections.singletonList(menu));
+                } catch(IOException e) {
+                } finally {
+                    latch.countDown();
+                }
+            });
+            latch.await();
+
+            this.clickOn(275, 20)
+                .clickOn(275,60)
+                .sleep(1000);
+
+            PasswordField pwField = this.lookup("#textPassword").queryAs(PasswordField.class);
+            this.clickOn(pwField).sleep(250, TimeUnit.MILLISECONDS);
+            TypeUtil.typeString(this, "password");
+            Button btnContinue = this.lookup("#btnContinue").queryAs(Button.class);
+            this.clickOn(btnContinue)
+                .sleep(1000);
+
+            Assertions.assertTrue((Boolean) new Zip4jArchiveReadService().generateArchiveMetaData(archive.toString()).getProperty(KEY_ENCRYPTION_ENABLE).orElse(false), "Generated file was not encrypted");
+        } finally {
+            Files.deleteIfExists(archive);
+        }
+    }
+
+    @Test
+    @DisplayName("Test: Encrypt an temporary zip archive is not possible")
+    public void testFX_EncryptTemporaryZipArchive_Failure() throws IOException,InterruptedException {
+        try {
+            Path archive = Paths.get(STORE_TEMP.toAbsolutePath().toString(), "temp.zip");
+            simNewArchive(this, archive, true);
+
+            CountDownLatch latch = new CountDownLatch(1);
+            JFXUtil.runLater(() -> {
+                try {
+                    Stage aboutStage = genFrmAbout();
+                    javafx.scene.control.Menu menu = new javafx.scene.control.Menu();
+                    final MenuBar menuBar = (MenuBar) new Zip4jArchiveWriteService().getFXFormByIdentifier(CUSTOM_MENUS)
+                                                                                    .get()
+                                                                                    .getContent();
+                    menu.getItems()
+                        .addAll(menuBar.getMenus().get(0).getItems());
+                    menu.setText(menuBar.getMenus().get(0).getText());
+                    createSystemMenu(aboutStage,
+                                     Collections.singletonList(menu));
+                } catch(IOException e) {
+                } finally {
+                    latch.countDown();
+                }
+            });
+            latch.await();
+
+            this.sleep(1000)
+                .clickOn(275, 20)
+                .clickOn(275,60)
+                .sleep(1000);
+
+            DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
+            Assertions.assertTrue(dialogPane.getContentText()
+                                            .matches(String.format(".*incompatible-encrypt.*")));
+        } finally {
+        }
     }
 }
