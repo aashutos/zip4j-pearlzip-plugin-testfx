@@ -12,6 +12,8 @@ import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
 import com.ntak.testfx.FormUtil;
+import com.ntak.testfx.NativeFileChooserUtil;
+import com.ntak.testfx.TestFXConstants;
 import com.ntak.testfx.TypeUtil;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -32,8 +34,11 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static com.ntak.pearlzip.archive.constants.ArchiveConstants.CURRENT_SETTINGS;
 import static com.ntak.pearlzip.archive.pub.ArchiveService.CUSTOM_MENUS;
 import static com.ntak.pearlzip.archive.zip4j.constants.Zip4jConstants.KEY_ENCRYPTION_ENABLE;
+import static com.ntak.pearlzip.archive.zip4j.constants.Zip4jConstants.KEY_SPLIT_ARCHIVE_SIZE;
+import static com.ntak.pearlzip.ui.UITestSuite.clearDirectory;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.DSV;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.SETTINGS_FILE;
 import static com.ntak.pearlzip.ui.constants.ZipConstants.STORE_TEMP;
@@ -59,6 +64,8 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
      *  + Open archive - length validation check
      *  + Encrypt an unencrypted zip archive - success
      *  + Encrypt a temporary zip archive - failure
+     *  + Split an unencrypted zip archive - success
+     *  + Split an encrypted zip archive - failure
      */
 
     @Test
@@ -429,7 +436,7 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
 
     @Test
     @DisplayName("Test: Create zip archive with AES-256 bit encryption with no password fails")
-    public void testFX_CreateEncryptedArchiveAES256NoPassword_Fail() throws IOException {
+    public void testFX_CreateEncryptedArchiveAES256NoPassword_Fails() throws IOException {
         // Set up
         Path archive = Path.of(STORE_TEMP.toAbsolutePath().toString(), "pz1234567890", "ea.zip");
         Files.createDirectories(archive.getParent());
@@ -503,25 +510,7 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
             clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 80));
             PearlZipFXUtil.simOpenArchive(this, archive, false, false);
 
-            CountDownLatch latch = new CountDownLatch(1);
-            JFXUtil.runLater(() -> {
-                try {
-                    Stage aboutStage = genFrmAbout();
-                    javafx.scene.control.Menu menu = new javafx.scene.control.Menu();
-                    final MenuBar menuBar = (MenuBar) new Zip4jArchiveWriteService().getFXFormByIdentifier(CUSTOM_MENUS)
-                                                                                    .get()
-                                                                                    .getContent();
-                    menu.getItems()
-                        .addAll(menuBar.getMenus().get(0).getItems());
-                    menu.setText(menuBar.getMenus().get(0).getText());
-                    createSystemMenu(aboutStage,
-                                     Collections.singletonList(menu));
-                } catch(IOException e) {
-                } finally {
-                    latch.countDown();
-                }
-            });
-            latch.await();
+            initialiseSystemMenu();
 
             this.clickOn(275, 20)
                 .clickOn(275,60)
@@ -547,25 +536,7 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
             Path archive = Paths.get(STORE_TEMP.toAbsolutePath().toString(), "temp.zip");
             simNewArchive(this, archive, true);
 
-            CountDownLatch latch = new CountDownLatch(1);
-            JFXUtil.runLater(() -> {
-                try {
-                    Stage aboutStage = genFrmAbout();
-                    javafx.scene.control.Menu menu = new javafx.scene.control.Menu();
-                    final MenuBar menuBar = (MenuBar) new Zip4jArchiveWriteService().getFXFormByIdentifier(CUSTOM_MENUS)
-                                                                                    .get()
-                                                                                    .getContent();
-                    menu.getItems()
-                        .addAll(menuBar.getMenus().get(0).getItems());
-                    menu.setText(menuBar.getMenus().get(0).getText());
-                    createSystemMenu(aboutStage,
-                                     Collections.singletonList(menu));
-                } catch(IOException e) {
-                } finally {
-                    latch.countDown();
-                }
-            });
-            latch.await();
+            initialiseSystemMenu();
 
             this.sleep(1000)
                 .clickOn(275, 20)
@@ -578,4 +549,115 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
         } finally {
         }
     }
+
+    @Test
+    @DisplayName("Test: Split an unencrypted zip archive successfully")
+    public void testFX_SplitUnencryptedZipArchive_Success() throws IOException, InterruptedException {
+        // Set split size to minimum value...
+        String prevCfgValue = CURRENT_SETTINGS.getProperty(KEY_SPLIT_ARCHIVE_SIZE);
+        CURRENT_SETTINGS.setProperty(KEY_SPLIT_ARCHIVE_SIZE, "65536");
+
+        Path srcArchive = Paths.get("src", "test", "resources", "unencryptedArchive.zip").toAbsolutePath();
+        Path archive = Paths.get("tempArchive.zip").toAbsolutePath();
+
+        Path filePath = Paths.get("src", "test", "resources", "megFile.bin").toAbsolutePath();
+        Path tgtArchive = Files.createTempDirectory("pz");
+        try {
+            Files.copy(srcArchive, archive, StandardCopyOption.REPLACE_EXISTING);
+            // Hard coded movement to open MenuItem
+            clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 80));
+            PearlZipFXUtil.simOpenArchive(this, archive, false, false);
+            simAddFile(this, filePath);
+
+            FXArchiveInfo info = JFXUtil.lookupArchiveInfo(archive.toString()).get();
+            while (info.getFiles().size() < 4) {
+                sleep(300);
+            }
+            sleep(300);
+            initialiseSystemMenu();
+            sleep(300);
+            this.clickOn(275, 10)
+                .clickOn(275,40)
+                .sleep(300);
+
+            NativeFileChooserUtil.chooseFile(TestFXConstants.PLATFORM, this, tgtArchive);
+            sleep(5000);
+            Assertions.assertTrue(Files.list(tgtArchive).count() > 1, String.format("Archive was not split as " +
+                                                                                            "expected. Number of " +
+                                                                                            "files detected: %s",
+                                                                                    Files.list(tgtArchive).count()));
+        } finally {
+            Files.deleteIfExists(archive);
+            clearDirectory(tgtArchive);
+            if (Objects.nonNull(prevCfgValue)) {
+                CURRENT_SETTINGS.setProperty(KEY_SPLIT_ARCHIVE_SIZE, prevCfgValue);
+            }
+            System.out.println(tgtArchive);
+        }
+    }
+
+    @Test
+    @DisplayName("Test: Split an encrypted zip archive fails")
+    public void testFX_SplitEncryptedZipArchive_Fails() throws IOException, InterruptedException {
+        // Set split size to minimum value...
+        String prevCfgValue = CURRENT_SETTINGS.getProperty(KEY_SPLIT_ARCHIVE_SIZE);
+        CURRENT_SETTINGS.setProperty(KEY_SPLIT_ARCHIVE_SIZE, "65536");
+
+        Path srcArchive = Paths.get("src", "test", "resources", "ea.zip").toAbsolutePath();
+        Path archive = Paths.get("tempencryptedarchive.zip").toAbsolutePath();
+
+        Path tgtArchive = Files.createTempDirectory("pz");
+        try {
+            Files.copy(srcArchive, archive, StandardCopyOption.REPLACE_EXISTING);
+            // Hard coded movement to open MenuItem
+            clickOn(Point2D.ZERO.add(110, 10)).clickOn(Point2D.ZERO.add(110, 80));
+            Zip4jTestUtil.simOpenEncryptedArchive(this, archive, false, false,"password");
+
+            FXArchiveInfo info = JFXUtil.lookupArchiveInfo(archive.toString()).get();
+            sleep(300);
+            initialiseSystemMenu();
+            sleep(300);
+            this.clickOn(275, 10)
+                .clickOn(275,40)
+                .sleep(300);
+
+            DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
+            Assertions.assertTrue(dialogPane.getContentText()
+                                            .matches(String.format(".*incompatible-split.*")));
+        } finally {
+            Files.deleteIfExists(archive);
+            clearDirectory(tgtArchive);
+            if (Objects.nonNull(prevCfgValue)) {
+                CURRENT_SETTINGS.setProperty(KEY_SPLIT_ARCHIVE_SIZE, prevCfgValue);
+            }
+            System.out.println(tgtArchive);
+        }
+    }
+
+    public static void initialiseSystemMenu() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        JFXUtil.runLater(() -> {
+            try {
+                Stage aboutStage = genFrmAbout();
+                Menu menu = new Menu();
+                final MenuBar menuBar = (MenuBar) new Zip4jArchiveWriteService().getFXFormByIdentifier(CUSTOM_MENUS)
+                                                                                .get()
+                                                                                .getContent();
+                menu.getItems()
+                    .addAll(menuBar.getMenus()
+                                   .get(0)
+                                   .getItems());
+                menu.setText(menuBar.getMenus()
+                                    .get(0)
+                                    .getText());
+                createSystemMenu(aboutStage,
+                                 Collections.singletonList(menu));
+            } catch(IOException e) {
+            } finally {
+                latch.countDown();
+            }
+        });
+        latch.await();
+    }
+
 }
