@@ -15,6 +15,7 @@
         <pearl-zip.version>0.0.0.3</pearl-zip.version>
         <log4j.version>2.17.0</log4j.version>
         <junit.version>5.5.2</junit.version>
+        <junit.jupiter.version>1.5.2</junit.jupiter.version>
         <junit-platform-runner.version>1.5.2</junit-platform-runner.version>
         <mockito-core.version>3.9.0</mockito-core.version>
         <pearl-zip.version>0.0.0.3</pearl-zip.version>
@@ -87,6 +88,17 @@
             <artifactId>eventbus</artifactId>
             <version>${eventbus.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-commons</artifactId>
+            <version>${junit.jupiter.version}</version>
         </dependency>
     </dependencies>
     <profiles>
