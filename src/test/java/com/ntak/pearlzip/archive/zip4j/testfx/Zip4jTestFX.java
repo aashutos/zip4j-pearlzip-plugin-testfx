@@ -512,8 +512,8 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
 
             initialiseSystemMenu();
 
-            this.clickOn(275, 20)
-                .clickOn(275,60)
+            this.clickOn(325, 20)
+                .clickOn(325,60)
                 .sleep(1000);
 
             PasswordField pwField = this.lookup("#textPassword").queryAs(PasswordField.class);
@@ -539,8 +539,8 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
             initialiseSystemMenu();
 
             this.sleep(1000)
-                .clickOn(275, 20)
-                .clickOn(275,60)
+                .clickOn(325, 20)
+                .clickOn(325,60)
                 .sleep(1000);
 
             DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
@@ -576,8 +576,8 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
             sleep(300);
             initialiseSystemMenu();
             sleep(300);
-            this.clickOn(275, 10)
-                .clickOn(275,40)
+            this.clickOn(325, 10)
+                .clickOn(325,40)
                 .sleep(300);
 
             NativeFileChooserUtil.chooseFile(TestFXConstants.PLATFORM, this, tgtArchive);
@@ -617,8 +617,8 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
             sleep(300);
             initialiseSystemMenu();
             sleep(300);
-            this.clickOn(275, 10)
-                .clickOn(275,40)
+            this.clickOn(325, 10)
+                .clickOn(325,40)
                 .sleep(300);
 
             DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
