@@ -1,31 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <groupId>com.ntak</groupId>
     <artifactId>pearl-zip-archive-zip4j-testFX</artifactId>
-    <version>0.0.0.2</version>
+    <version>0.0.4.0</version>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <pearl-zip.version>0.0.0.3</pearl-zip.version>
+        <pearl-zip.version>0.0.4.0</pearl-zip.version>
         <log4j.version>2.17.0</log4j.version>
         <junit.version>5.5.2</junit.version>
         <junit.jupiter.version>1.5.2</junit.jupiter.version>
         <junit-platform-runner.version>1.5.2</junit-platform-runner.version>
         <mockito-core.version>3.9.0</mockito-core.version>
-        <pearl-zip.version>0.0.0.3</pearl-zip.version>
-        <zip4j.version>2.8.0</zip4j.version>
+        <pearl-zip.version>0.0.4.0</pearl-zip.version>
+        <zip4j.version>2.9.1</zip4j.version>
         <javafx.version>17.0.1</javafx.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <deploy.settings.loc>${project.basedir}/scripts/settings.properties</deploy.settings.loc>
         <pearlzip.zip4j.next.version>${project.version}</pearlzip.zip4j.next.version>
-        <pearl-zip-ui.test.version>0.0.0.3</pearl-zip-ui.test.version>
+        <pearl-zip-ui.test.version>0.0.4.0</pearl-zip-ui.test.version>
         <testfx.version>4.0.16-alpha</testfx.version>
         <openjfx-monocle.version>jdk-12.0.1+2</openjfx-monocle.version>
         <eventbus.version>3.2.0</eventbus.version>
@@ -50,7 +48,7 @@
         <dependency>
             <groupId>com.ntak</groupId>
             <artifactId>ntak-testfx-util</artifactId>
-            <version>0.0.0.3</version>
+            <version>${pearl-zip-ui.test.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -136,4 +134,23 @@
             </build>
         </profile>
     </profiles>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
+                <configuration>
+                    <includes>
+                        <include>**/*TestSuite.class</include>
+                    </includes>
+                    <argLine>
+                        --add-classpath ${settings.localRepository}/com/ntak/pearl-zip-ui/${pearl-zip.version}/pearl-zip-ui-${pearl-zip.version}.jar
+                        --add-opens com.ntak.pearlzip.ui/modena-dark=pearl.zip.archive.zip4j
+                        --illegal-access=permit
+                    </argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

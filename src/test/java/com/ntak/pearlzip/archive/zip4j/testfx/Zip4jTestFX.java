@@ -4,6 +4,7 @@
 
 package com.ntak.pearlzip.archive.zip4j.testfx;
 
+import com.ntak.pearlzip.archive.constants.LoggingConstants;
 import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService;
 import com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService;
@@ -22,6 +23,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -67,6 +69,14 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
      *  + Split an unencrypted zip archive - success
      *  + Split an encrypted zip archive - failure
      */
+    @BeforeAll
+    public static void setUpOnce() {
+        LoggingConstants.LOG_BUNDLE = ResourceBundle.getBundle("pearlzip",
+                                                               Locale.getDefault());
+        LoggingConstants.CUSTOM_BUNDLE = ResourceBundle.getBundle("custom",
+                                                                  Locale.getDefault());
+    }
+
 
     @Test
     @DisplayName("Test: Open encrypted archive successfully")
@@ -277,16 +287,12 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
         }
 
         try {
-            // Navigate to options
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30));
-
             // Navigate to Zip4J Options tab
-            this.clickOn((t) -> Optional.ofNullable(t.getId()).orElse("")
-                                   .equals("com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService.options"))
-                .clickOn(MouseButton.PRIMARY);
-            this.push(new KeyCode[]{KeyCode.UP})
-                .sleep(50L, TimeUnit.MILLISECONDS);
+            this.clickOn(Point2D.ZERO.add(160, 10))
+                .clickOn(Point2D.ZERO.add(160, 30))
+                .clickOn(Point2D.ZERO.add(925, 200))
+                .doubleClickOn(Point2D.ZERO.add(925, 375));
+
             this.clickOn("#comboDefaultCompressionLevel");
 
             // Make changes
@@ -335,16 +341,12 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
         }
 
         try {
-            // Navigate to options
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30));
-
             // Navigate to Zip4J Options tab
-            this.clickOn((t) -> Optional.ofNullable(t.getId()).orElse("")
-                                        .equals("com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService.options"))
-                .clickOn(MouseButton.PRIMARY);
-            this.push(new KeyCode[]{KeyCode.UP})
-                .sleep(50L, TimeUnit.MILLISECONDS);
+            this.clickOn(Point2D.ZERO.add(160, 10))
+                .clickOn(Point2D.ZERO.add(160, 30))
+                .clickOn(Point2D.ZERO.add(925, 200))
+                .doubleClickOn(Point2D.ZERO.add(925, 375));
+
             this.clickOn("#comboDefaultCompressionLevel");
 
             // Make changes
@@ -391,16 +393,12 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
         }
 
         try {
-            // Navigate to options
-            this.clickOn(Point2D.ZERO.add(160, 10))
-                .clickOn(Point2D.ZERO.add(160, 30));
-
             // Navigate to Zip4J Options tab
-            this.clickOn((t) -> Optional.ofNullable(t.getId()).orElse("")
-                                        .equals("com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService.options"))
-                .clickOn(MouseButton.PRIMARY);
-            this.push(new KeyCode[]{KeyCode.UP})
-                .sleep(50L, TimeUnit.MILLISECONDS);
+            this.clickOn(Point2D.ZERO.add(160, 10))
+                .clickOn(Point2D.ZERO.add(160, 30))
+                .clickOn(Point2D.ZERO.add(925, 200))
+                .doubleClickOn(Point2D.ZERO.add(925, 375));
+
             this.clickOn("#comboDefaultCompressionLevel");
 
             // Make changes
@@ -512,8 +510,8 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
 
             initialiseSystemMenu();
 
-            this.clickOn(275, 20)
-                .clickOn(275,60)
+            this.clickOn(325, 20)
+                .clickOn(325,60)
                 .sleep(1000);
 
             PasswordField pwField = this.lookup("#textPassword").queryAs(PasswordField.class);
@@ -539,8 +537,8 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
             initialiseSystemMenu();
 
             this.sleep(1000)
-                .clickOn(275, 20)
-                .clickOn(275,60)
+                .clickOn(325, 20)
+                .clickOn(325,60)
                 .sleep(1000);
 
             DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
@@ -576,8 +574,8 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
             sleep(300);
             initialiseSystemMenu();
             sleep(300);
-            this.clickOn(275, 10)
-                .clickOn(275,40)
+            this.clickOn(325, 10)
+                .clickOn(325,40)
                 .sleep(300);
 
             NativeFileChooserUtil.chooseFile(TestFXConstants.PLATFORM, this, tgtArchive);
@@ -617,8 +615,8 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
             sleep(300);
             initialiseSystemMenu();
             sleep(300);
-            this.clickOn(275, 10)
-                .clickOn(275,40)
+            this.clickOn(325, 10)
+                .clickOn(325,40)
                 .sleep(300);
 
             DialogPane dialogPane = lookup(".dialog-pane").queryAs(DialogPane.class);
