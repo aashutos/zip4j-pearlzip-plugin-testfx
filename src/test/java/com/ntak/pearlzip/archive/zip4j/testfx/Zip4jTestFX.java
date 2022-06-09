@@ -632,8 +632,8 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
         }
     }
 
-    public static void initialiseSystemMenu() throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(1);
+    public static void initialiseSystemMenu() throws InterruptedException, IOException {
+        final CountDownLatch latch = new CountDownLatch(1);
         JFXUtil.runLater(() -> {
             try {
                 Stage aboutStage = genFrmAbout();
@@ -651,11 +651,11 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
                 createSystemMenu(aboutStage,
                                  Collections.singletonList(menu));
             } catch(IOException e) {
+
             } finally {
                 latch.countDown();
             }
         });
         latch.await();
     }
-
 }

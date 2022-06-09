@@ -9,6 +9,7 @@ import com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService;
 import com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService;
 import com.ntak.pearlzip.ui.constants.ResourceConstants;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
 import com.ntak.pearlzip.ui.pub.SysMenuController;
 import com.ntak.pearlzip.ui.util.AbstractPearlZipTestFX;
@@ -102,15 +103,15 @@ public abstract class AbstractZip4jTestFX extends AbstractPearlZipTestFX {
         for (javafx.scene.control.Menu menu : customMenus) {
             sysMenu.getMenus().add(menu);
         }
-        Menu tempMenu = ResourceConstants.WINDOW_MENU;
-        ResourceConstants.WINDOW_MENU =
-                sysMenu.getMenus()
-                       .stream()
-                       .filter(m -> m.getText()
-                                     .equals(LoggingUtil.resolveTextKey(CNS_SYSMENU_WINDOW_TEXT)))
-                       .findFirst()
-                       .get();
-        ResourceConstants.WINDOW_MENU.getItems().addAll(tempMenu.getItems());
+        Menu tempMenu =
+                InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Menu>getAdditionalConfig(CK_WINDOW_MENU).get();
+        tempMenu.getItems().add(0,sysMenu.getMenus()
+               .stream()
+               .filter(m -> m.getText()
+                             .equals(LoggingUtil.resolveTextKey(CNS_SYSMENU_WINDOW_TEXT)))
+               .findFirst()
+               .get()
+        );
 
         // Use the menu sysMenu for all stages including new ones
         if (menuToolkit.systemUsesDarkMode()) {
