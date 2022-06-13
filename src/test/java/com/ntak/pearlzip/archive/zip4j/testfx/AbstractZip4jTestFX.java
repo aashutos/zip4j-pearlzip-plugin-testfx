@@ -47,8 +47,11 @@ public abstract class AbstractZip4jTestFX extends AbstractPearlZipTestFX {
 
         PearlZipFXUtil.initialise(stage, List.of(new Zip4jArchiveWriteService()),List.of(new Zip4jArchiveReadService()));
 
-        ZipConstants.LOCAL_TEMP = Paths.get(System.getProperty("user.home"), ".pz", "temp");
-        ZipConstants.STORE_TEMP = Paths.get(System.getProperty("user.home"), ".pz", "temp");
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_LOCAL_TEMP, Paths.get(System.getProperty("user.home"),
+                                                                                  ".pz", "temp"));
+        InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP,
+                                                                                    Paths.get(System.getProperty(
+                                                                                            "user.home"), ".pz", "temp"));
         DEFAULT_BUS.register(ErrorAlertConsumer.getErrorAlertConsumer());
     }
 
