@@ -7,7 +7,6 @@ package com.ntak.pearlzip.archive.zip4j.testfx;
 import com.ntak.pearlzip.archive.util.LoggingUtil;
 import com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService;
 import com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService;
-import com.ntak.pearlzip.ui.constants.ResourceConstants;
 import com.ntak.pearlzip.ui.constants.ZipConstants;
 import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.mac.MacPearlZipApplication;
