@@ -39,8 +39,7 @@ import static com.ntak.pearlzip.archive.zip4j.constants.Zip4jConstants.KEY_ENCRY
 import static com.ntak.pearlzip.archive.zip4j.constants.Zip4jConstants.KEY_SPLIT_ARCHIVE_SIZE;
 import static com.ntak.pearlzip.ui.UITestSuite.clearDirectory;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.DSV;
-import static com.ntak.pearlzip.ui.constants.ZipConstants.CK_STORE_TEMP;
-import static com.ntak.pearlzip.ui.constants.ZipConstants.SETTINGS_FILE;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.pub.PearlZipApplication.genFrmAbout;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static com.ntak.testfx.FormUtil.resetComboBox;
@@ -49,7 +48,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 public class Zip4jTestFX extends AbstractZip4jTestFX {
 
     Path STORE_TEMP;
-
+    Path SETTINGS_FILE;
     /*
      *  Test cases:
      *  + Open encrypted Zip archive - success
@@ -79,6 +78,7 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
     @BeforeEach
     public void setUp() {
         STORE_TEMP = InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_STORE_TEMP).get();
+        SETTINGS_FILE = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_SETTINGS_FILE).get();
     }
 
     @Test

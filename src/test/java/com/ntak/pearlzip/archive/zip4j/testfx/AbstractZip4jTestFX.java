@@ -24,6 +24,7 @@ import javafx.scene.control.MenuBar;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
@@ -40,8 +41,8 @@ public abstract class AbstractZip4jTestFX extends AbstractPearlZipTestFX {
     @Override
     public void start(Stage stage) throws IOException, TimeoutException {
         System.setProperty("configuration.ntak.pearl-zip.no-files-history", "5");
-        if (!ZipConstants.getAdditionalConfig(MENU_TOOLKIT).isPresent()) {
-            ZipConstants.setAdditionalConfig(MENU_TOOLKIT,MenuToolkit.toolkit(Locale.getDefault()));
+        if (!InternalContextCache.INTERNAL_CONFIGURATION_CACHE.getAdditionalConfig(CK_MENU_TOOLKIT).isPresent()) {
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MENU_TOOLKIT, MenuToolkit.toolkit(Locale.getDefault()));
         }
 
         PearlZipFXUtil.initialise(stage, List.of(new Zip4jArchiveWriteService()),List.of(new Zip4jArchiveReadService()));
@@ -51,6 +52,10 @@ public abstract class AbstractZip4jTestFX extends AbstractPearlZipTestFX {
         InternalContextCache.GLOBAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_STORE_TEMP,
                                                                                     Paths.get(System.getProperty(
                                                                                             "user.home"), ".pz", "temp"));
+        Path SETTINGS_FILE = Paths.get(System.getProperty(CNS_SETTINGS_FILE, Paths.get(System.getProperty("user.home"),
+                                                                                       ".pz",
+                                                                                       "settings.properties").toString()));
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_SETTINGS_FILE, SETTINGS_FILE);
         DEFAULT_BUS.register(ErrorAlertConsumer.getErrorAlertConsumer());
     }
 
@@ -64,17 +69,17 @@ public abstract class AbstractZip4jTestFX extends AbstractPearlZipTestFX {
         ///// Create System Menu //////////////////
         //////////////////////////////////////////
 
-        if (!ZipConstants.getAdditionalConfig(MENU_TOOLKIT).isPresent()) {
-            ZipConstants.setAdditionalConfig(MENU_TOOLKIT,MenuToolkit.toolkit(Locale.getDefault()));
+        if (!InternalContextCache.INTERNAL_CONFIGURATION_CACHE.getAdditionalConfig(CK_MENU_TOOLKIT).isPresent()) {
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_MENU_TOOLKIT, MenuToolkit.toolkit(Locale.getDefault()));
         }
 
         // Create a new System Menu
         String appName = System.getProperty(CNS_NTAK_PEARL_ZIP_APP_NAME, "PearlZip");
         MenuBar sysMenu;
-        final MenuToolkit menuToolkit = ZipConstants.<MenuToolkit>getAdditionalConfig(MENU_TOOLKIT)
+        final MenuToolkit menuToolkit = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<MenuToolkit>getAdditionalConfig(CK_MENU_TOOLKIT)
                                                     .get();
 
-        if (!ZipConstants.getAdditionalConfig(SYS_MENU).isPresent()) {
+        if (!InternalContextCache.INTERNAL_CONFIGURATION_CACHE.getAdditionalConfig(CK_SYS_MENU).isPresent()) {
 
             sysMenu = new MenuBar();
             sysMenu.setUseSystemMenuBar(true);
@@ -92,13 +97,13 @@ public abstract class AbstractZip4jTestFX extends AbstractPearlZipTestFX {
             menuController.initData();
             sysMenu.getMenus()
                    .addAll(additionalMenu.getMenus());
-            ZipConstants.setAdditionalConfig(CORE_MENU_SIZE, sysMenu.getMenus().size());
+            InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_CORE_MENU_SIZE, sysMenu.getMenus().size());
         } else {
-            sysMenu = ZipConstants.<MenuBar>getAdditionalConfig(SYS_MENU)
+            sysMenu = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<MenuBar>getAdditionalConfig(CK_SYS_MENU)
                                   .get();;
         }
-        ZipConstants.setAdditionalConfig(SYS_MENU, sysMenu);
-        int coreMenuSize = ZipConstants.<Integer>getAdditionalConfig(CORE_MENU_SIZE)
+        InternalContextCache.INTERNAL_CONFIGURATION_CACHE.setAdditionalConfig(CK_SYS_MENU, sysMenu);
+        int coreMenuSize = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Integer>getAdditionalConfig(CK_CORE_MENU_SIZE)
                                        .get();
         sysMenu.getMenus().remove(coreMenuSize,sysMenu.getMenus().size());
 
