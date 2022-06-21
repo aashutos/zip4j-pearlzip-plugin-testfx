@@ -9,6 +9,7 @@ import com.ntak.pearlzip.archive.pub.FileInfo;
 import com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveReadService;
 import com.ntak.pearlzip.archive.zip4j.pub.Zip4jArchiveWriteService;
 import com.ntak.pearlzip.archive.zip4j.util.Zip4jTestUtil;
+import com.ntak.pearlzip.ui.constants.internal.InternalContextCache;
 import com.ntak.pearlzip.ui.model.FXArchiveInfo;
 import com.ntak.pearlzip.ui.util.JFXUtil;
 import com.ntak.pearlzip.ui.util.PearlZipFXUtil;
@@ -19,13 +20,9 @@ import com.ntak.testfx.TypeUtil;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,8 +39,7 @@ import static com.ntak.pearlzip.archive.zip4j.constants.Zip4jConstants.KEY_ENCRY
 import static com.ntak.pearlzip.archive.zip4j.constants.Zip4jConstants.KEY_SPLIT_ARCHIVE_SIZE;
 import static com.ntak.pearlzip.ui.UITestSuite.clearDirectory;
 import static com.ntak.pearlzip.ui.constants.ResourceConstants.DSV;
-import static com.ntak.pearlzip.ui.constants.ZipConstants.SETTINGS_FILE;
-import static com.ntak.pearlzip.ui.constants.ZipConstants.STORE_TEMP;
+import static com.ntak.pearlzip.ui.constants.ZipConstants.*;
 import static com.ntak.pearlzip.ui.pub.PearlZipApplication.genFrmAbout;
 import static com.ntak.pearlzip.ui.util.PearlZipFXUtil.*;
 import static com.ntak.testfx.FormUtil.resetComboBox;
@@ -51,6 +47,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 public class Zip4jTestFX extends AbstractZip4jTestFX {
 
+    Path STORE_TEMP;
+    Path SETTINGS_FILE;
     /*
      *  Test cases:
      *  + Open encrypted Zip archive - success
@@ -77,6 +75,11 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
                                                                   Locale.getDefault());
     }
 
+    @BeforeEach
+    public void setUp() {
+        STORE_TEMP = InternalContextCache.GLOBAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_STORE_TEMP).get();
+        SETTINGS_FILE = InternalContextCache.INTERNAL_CONFIGURATION_CACHE.<Path>getAdditionalConfig(CK_SETTINGS_FILE).get();
+    }
 
     @Test
     @DisplayName("Test: Open encrypted archive successfully")
@@ -118,6 +121,7 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
         Files.createDirectories(archive.getParent());
         Files.copy(srcArchive, archive, StandardCopyOption.REPLACE_EXISTING);
         Path file = Path.of(STORE_TEMP.toAbsolutePath().toString(), "pz1234567890", "additional_file");
+        Files.deleteIfExists(file);
         Files.createFile(file);
 
         try {
@@ -632,8 +636,8 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
         }
     }
 
-    public static void initialiseSystemMenu() throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(1);
+    public static void initialiseSystemMenu() throws InterruptedException, IOException {
+        final CountDownLatch latch = new CountDownLatch(1);
         JFXUtil.runLater(() -> {
             try {
                 Stage aboutStage = genFrmAbout();
@@ -651,11 +655,11 @@ public class Zip4jTestFX extends AbstractZip4jTestFX {
                 createSystemMenu(aboutStage,
                                  Collections.singletonList(menu));
             } catch(IOException e) {
+
             } finally {
                 latch.countDown();
             }
         });
         latch.await();
     }
-
 }

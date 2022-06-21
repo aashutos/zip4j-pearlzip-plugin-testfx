@@ -3,14 +3,14 @@
 
     <groupId>com.ntak</groupId>
     <artifactId>pearl-zip-archive-zip4j-testFX</artifactId>
-    <version>0.0.4.1</version>
+    <version>0.0.5.0</version>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <pearl-zip.version>0.0.4.1</pearl-zip.version>
+        <pearl-zip.version>0.0.5.0</pearl-zip.version>
         <log4j.version>2.17.0</log4j.version>
         <junit.version>5.5.2</junit.version>
         <junit.jupiter.version>1.5.2</junit.jupiter.version>
@@ -22,7 +22,7 @@
         <maven.deploy.skip>true</maven.deploy.skip>
         <deploy.settings.loc>${project.basedir}/scripts/settings.properties</deploy.settings.loc>
         <pearlzip.zip4j.next.version>${project.version}</pearlzip.zip4j.next.version>
-        <pearl-zip-ui.test.version>0.0.4.1</pearl-zip-ui.test.version>
+        <pearl-zip-ui.test.version>0.0.5.0</pearl-zip-ui.test.version>
         <testfx.version>4.0.16-alpha</testfx.version>
         <openjfx-monocle.version>jdk-12.0.1+2</openjfx-monocle.version>
         <eventbus.version>3.2.0</eventbus.version>
